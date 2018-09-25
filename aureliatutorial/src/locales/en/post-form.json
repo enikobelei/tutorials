@@ -1,0 +1,9 @@
+{
+  "title" : "Title",
+  "body": "Body",
+  "add-tag": "Add Tag",
+  "edit-post": "Edit Post",
+  "create-post": "Create Post",
+  "title-placeholder" : "Your Post Title",
+  "required-field" : "You must enter an ${$displayName}"
+}

@@ -1,0 +1,12 @@
+{
+  "title" : "Titre",
+  "body": "Contenu",
+  "add-tag": "Ajouter Marque",
+  "edit-post": "Modifier Article",
+  "create-post": "Creer Article",
+  "title-placeholder" : "Voutre titre de Article",
+  "required-field" : "Vous devez enter un ${$displayName} "
+
+  
+
+}

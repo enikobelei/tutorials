@@ -1,0 +1,90 @@
+<template>
+  <require from="bootstrap/dist/css/bootstrap.css"></require>
+  <require from="toastr/build/toastr.min.css"></require>
+  <require from="./assets/styles/blog.css"></require>
+
+  <div class="container">
+     
+      <nav class="navbar navbar-expand-sm navbar-dark bg-dark">
+          <a class="navbar-brand" href="#">Aurelia Sample Blog</a>
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarsExample03" aria-controls="navbarsExample03" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+    
+          <div class="collapse navbar-collapse" id="navbarsExample03">
+            <ul class="navbar-nav mr-auto">
+              <li class="nav-item ${ router.currentInstruction.config.name === 'home' ? 'active' : '' }">
+                <a class="nav-link" href="#" t="nav:home">sds <span class="sr-only">(current)</span></a>
+              </li>
+              <li class="nav-item ${ router.currentInstruction.config.name === 'login' ? 'active' : '' }">
+                <a class="nav-link" route-href="route: login" if.bind="!currentUser"  t="nav:login">Log in</a>
+              </li>
+              <li class="nav-item ${ router.currentInstruction.config.name === 'signup' ? 'active' : '' }">
+                  <a class="nav-link" route-href="route: signup" if.bind="!currentUser"  t="nav:signup" >Sign Up</a>
+              </li>
+              <li class="nav-item  ${ router.currentInstruction.config.name ==='create-post' ? 'active' : '' }">
+                <a class="nav-link" route-href="route: create-post" if.bind="currentUser"  t="nav:newpost">New Post</a>
+              </li>
+              <li class="nav-item">
+                  <a class="nav-link" href="#"  if.bind="currentUser" click.delegate="logout()"  t="nav:logout">Log out</a>
+              </li>
+              
+            </ul>
+           
+          </div>
+        </nav>
+
+     
+
+    <main role="main" class="container">
+      <div class="row">
+        <div class="col-md-8 blog-main">
+         
+          <router-view></router-view>
+          
+
+         
+        </div><!-- /.blog-main -->
+
+        <aside class="col-md-4 blog-sidebar">
+          <p>
+            Welcome, ${currentUser || 'Guest' }
+          </p>
+          <div class="p-3 mb-3 bg-light rounded">
+            <h4 class="font-italic">Tags</h4>
+            <a route-href="route:tag-view; params.bind: {tag: tag}" repeat.for="tag of tags">
+              <span class="badge badge-pill badge-info">${tag}</span> 
+            </a>
+            
+          </div>
+
+          <div class="p-3">
+            <h4 class="font-italic">Archives</h4>
+            <ol class="list-unstyled mb-0">
+              <li repeat.for="archive of archives"><a route-href="route:archive-view; params.bind: {archive: archive}">${archive}</a></li>
+              
+            </ol>
+          </div>
+
+          <div class="p-3">
+            <h4 class="font-italic">Languages</h4>
+            <ol class="list-unstyled">
+              <li><a href="#" click.delegate="setLocale('en')">English</a></li>
+              <li><a href="#" click.delegate="setLocale('fr')">French</a></li>
+             
+            </ol>
+          </div>
+        </aside><!-- /.blog-sidebar -->
+
+      </div><!-- /.row -->
+
+    </main><!-- /.container -->
+
+    <footer class="blog-footer">
+      <p>Blog template built for <a href="https://getbootstrap.com/">Bootstrap</a> by <a href="https://twitter.com/mdo">@mdo</a>.</p>
+      <p>
+        <a href="#">Back to top</a>
+      </p>
+    </footer>
+  
+</template>
