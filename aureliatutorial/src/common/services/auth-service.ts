@@ -1,24 +1,28 @@
+import {HttpClient} from 'aurelia-http-client';
+
 export class AuthService {
   delay: number; 
   currentUser: string;
-  users: string[];
-	constructor() {
-		this.delay = 100;
-		this.currentUser = null;
-		this.users = ['Nick Shallee', 'Jane Doe'];
+  
+	constructor(private httpClient: HttpClient) {
+		
+    this.currentUser = null;
+    this.httpClient = new HttpClient();
+    this.httpClient.configure(config => {
+      config
+        
+        .withBaseUrl('http://localhost:61072/api/')
+        
+    });
 	}
-
+ 
 	login(name) : Promise<{user: string}> {
-		return new Promise((resolve, reject) => {
-		  setTimeout(() => {
-				if (this.users.includes(name)) {
-					this.currentUser = name;
-					resolve({ user: name });
-				} else {
-					reject(new Error ('Invalid credentials.' ));
-				}
-		  }, this.delay);
-		});
+		return new Promise((resolve, reject) => {		
+      this.httpClient.post("users/login", {name})
+        .then(data => {
+          this.currentUser =  data.content
+          resolve({ user: data.content });}
+    ).catch(error => reject(new Error (error)))});
 	}
 
 	logout():  Promise<{success: boolean}> {
@@ -35,17 +39,13 @@ export class AuthService {
 	}
 
 	signup(name) : Promise<{user: string}> {
-		return new Promise((resolve, reject) => {
-		  setTimeout(() => {
-				if (!this.users.includes(name)) {
-					this.users.push(name);
-					this.currentUser = name;
-					resolve({ user: name });
-				} else {
-					reject(new Error ('This user already exists.' ));
-				}
-		  }, this.delay);
-		});		
+    return new Promise((resolve, reject) => {		
+      this.httpClient.post("users/signup", {name})
+        .then(data => {
+          this.currentUser =  data.content;
+          resolve({ user: data.content });
+        }
+    ).catch(error => reject(new Error (error)))});
 	}
 
 }

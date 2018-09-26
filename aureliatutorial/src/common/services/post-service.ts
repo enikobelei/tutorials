@@ -1,7 +1,7 @@
 import {inject, autoinject} from 'aurelia-framework';
 import {AuthService} from './auth-service';
 import {Post} from "./models";
-import {HttpClient, json} from 'aurelia-fetch-client';
+import {HttpClient} from 'aurelia-http-client';
 
 @autoinject
 export class PostService {
@@ -10,135 +10,49 @@ export class PostService {
  
 	constructor(private authService: AuthService, private httpClient: HttpClient) {
 
-   
+    
 
     this.httpClient.configure(config => {
       config
         
         .withBaseUrl('http://localhost:61072/api/')
-        .withDefaults({
-          //mode: 'no-cors',
-          headers: {
-            //'X-Requested-With': 'Fetch',
-             'Content-Type': 'application/json; charset=utf-8' ,
-          
-          }
-        })
+        
         .withInterceptor({
           request(request) {
             console.log(`Requesting ${request.method} ${request.url}`);
             return request; // you can return a modified Request, or you can short-circuit the request by returning a Response
           },
           response(response) {
-            console.log(`Received ${response.status} ${response.url}`);
+            console.log(`Received ${response.content} `);
             return response; // you can return a modified Response
           }})
+          
         
     });
+		
+	}
 
+	allPostPreviews() : Promise<{posts: Post[]}>{
 	
-		// Fake a server response delay
-		this.delay = 100;
-		// Seed post data if it doesn't exist
-		if (!this.posts) {
-			this.posts = [
-				{
-					title: 'My first post',
-					body: 'Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec, vulputate eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo. Nullam dictum felis eu pede mollis pretium. Integer tincidunt. Cras dapibus. Vivamus elementum semper nisi. Aenean vulputate eleifend tellus. Aenean leo ligula, porttitor eu, consequat vitae, eleifend ac, enim. Aliquam lorem ante, dapibus in, viverra quis, feugiat a, tellus. Phasellus viverra nulla ut metus varius laoreet. Quisque rutrum. Aenean imperdiet. Etiam ultricies nisi vel augue. Curabitur ullamcorper ultricies nisi. Nam eget dui. Etiam rhoncus. Maecenas tempus, tellus eget condimentum rhoncus, sem quam semper libero, sit amet adipiscing sem neque sed ipsum. Nam quam nunc, blandit vel, luctus pulvinar, hendrerit id, lorem. Maecenas nec odio et ante tincidunt tempus. Donec vitae sapien ut libero venenatis faucibus. Nullam quis ante. Etiam sit amet orci eget eros faucibus tincidunt. Duis leo. Sed fringilla mauris sit amet nibh. Donec sodales sagittis magna. Sed consequat, leo eget bibendum sodales, augue velit cursus nunc, ',
-					author: 'Nick Shallee',
-					slug: 'my-first-post',
-					tags: ['aurelia', 'lorem', 'javascript'],
-					createdAt: new Date('July 1, 2017')
-				},
-				{
-					title: 'My second post',
-					body: 'A wonderful serenity has taken possession of my entire soul, like these sweet mornings of spring which I enjoy with my whole heart. I am alone, and feel the charm of existence in this spot, which was created for the bliss of souls like mine. I am so happy, my dear friend, so absorbed in the exquisite sense of mere tranquil existence, that I neglect my talents. I should be incapable of drawing a single stroke at the present moment; and yet I feel that I never was a greater artist than now. When, while the lovely valley teems with ',
-					author: 'Jane Doe',
-					slug: 'my-second-post',
-					tags: ['javascript', 'learning'],
-					createdAt: new Date('August 17, 2017')
-				},
-				{
-					title: 'My third post',
-					body: 'One morning, when Gregor Samsa woke from troubled dreams, he found himself transformed in his bed into a horrible vermin. He lay on his armour-like back, and if he lifted his head a little he could see his brown belly, slightly domed and divided by arches into stiff sections. The bedding was hardly able to cover it and seemed ready to slide off any moment. His many legs, pitifully thin compared with the size of the rest of him, waved about helplessly as he looked. "What\'s happened to me? " he thought. It wasn\'t a dream. His room, a proper human room although a little too small, lay peacefully between its four familiar walls. A collection of textile samples lay spread out on the table - Samsa was a travelling salesman - and above it there hung a picture that he had recently cut out of an illustrated magazine and housed in a nice, gilded frame. It showed a lady fitted out with a fur hat and fur boa who sat upright, raising a heavy fur muff that covered the whole of her lower arm towards the viewer. Gregor then turned to look out the window at the dull weather. Drops of rain could be heard hitting the pane, which made him feel quite sad. "How about if I sleep a little bit longer and forget all this nonsense", he thought, but that was something he was unable to do because he was used to sleeping on his right, and in his present state couldn\'t get into that position. However hard he threw himself onto his right, he always rolled back to where he was. He must have tried it a hundred times, shut his eyes so that he wouldn\'t have to look at the floundering legs, and only stopped when ',
-					author: 'Nick Shallee',
-					slug: 'my-third-post',
-					tags: ['kafka'],
-					createdAt: new Date('December 1, 2017')
-				}
-			]
-		}
-	}
+    return new Promise((resolve, reject) => {		
+      this.httpClient.get("posts")
+        .then(data => resolve({ posts: data.content })
+    ).catch(error => reject(new Error (error)))});
 
-	allPostPreviews() : Promise<any>{
-		// return new Promise((resolve, reject) => {
-		//   setTimeout(() => {
-		//   	if (this.posts) {
-		//   		let previews = this.posts.map(post => {
-		// 	  		return {
-		// 	  			title: post.title,
-		// 	  			body: post.body.substring(0,200) + '...',
-		// 	  			author: post.author,
-		// 	  			slug: post.slug,
-		// 	  			tags: post.tags,
-		// 	  			createdAt: post.createdAt
-		// 	  		}
-		// 	  	});
-		// 	  	previews.sort((a,b) => b.createdAt.getTime() - a.createdAt.getTime());
-		// 	  	resolve({ posts: previews });
-		//   	} else {
-		//   		reject(new Error ('There was an error retrieving the posts.'));
-		//   	}
-		//   }, this.delay);
-    // });
-    let promise = new Promise((resolve, reject) => {		
-     this.httpClient.fetch("posts")
-    .then(
-      response =>    
-        response.json()
-    .then(data => {
-      resolve({ posts: data });
-    }));
-    });
-  return promise;
-    // .catch(error => {
-    //   console.log(error);
-     
-    // });
-	}
+  }
 
 	allArchives() :Promise<{archives: string[]}> {
-		let months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-		return new Promise((resolve, reject) => {
-		  setTimeout(() => {
-		  	let archives = [];
-		  	this.posts.sort((a,b) => b.createdAt.getTime() - a.createdAt.getTime());
-		  	this.posts.forEach(post => {
-		  		archives.push(`${months[post.createdAt.getMonth()]} ${post.createdAt.getFullYear()}`);
-		  	});
-		  	if (archives) {	
-			  	resolve({ archives: archives.filter((v, i, a) => a.indexOf(v) === i) });		  		
-		  	} else {
-		  		reject(new Error ('There was an error retrieving the archives.' ));
-		  	}
-		  }, this.delay);
-		});		
+    return new Promise((resolve, reject) => {		
+      this.httpClient.get("archives")
+        .then(data => resolve({ archives: data.content })
+    ).catch(error => reject(new Error (error)))});
 	}
 
 	allTags() : Promise<{tags: string[]}> {
-		return new Promise((resolve, reject) => {
-		  setTimeout(() => {
-		  	let tags = [];
-		  	this.posts.forEach(post => {
-		  		tags = tags.concat(post.tags);
-		  	});
-		  	if (tags) {	
-			  	resolve({ tags: tags.filter((v, i, a) => a.indexOf(v) === i) });		  		
-		  	} else {
-		  		reject(new Error ('There was an error retrieving the tags.' ));
-		  	}
-		  }, this.delay);
-		});		
+    return new Promise((resolve, reject) => {		
+      this.httpClient.get("tags")
+        .then(data => resolve({ tags: data.content })
+    ).catch(error => reject(new Error (error)))});
 	}
 
 	create(post : Post) : Promise<{slug: string}>{
@@ -164,61 +78,36 @@ export class PostService {
 	}
 
 	find(slug: string) : Promise<{post: Post}> {
-		// return new Promise((resolve, reject) => {
-		//   setTimeout(() => {
-		//   	let post = this.posts.sort((a,b) => b.createdAt.getTime() - a.createdAt.getTime()).find(post => post.slug.toLowerCase() === slug.toLowerCase());
-		//   	if (post) {
-		// 	  	resolve({ post: post });
-		//   	} else {
-		//   		reject(new Error ('Post not found.' ));
-		//   	}
-		//   }, this.delay);
-    // });	
+		
     return  new Promise((resolve, reject) => {		
-      this.httpClient.fetch(`posts/${slug}`)
-     .then(
-       response =>    
-         response.json()
+      this.httpClient.get(`posts/${slug}`)
+    
      .then(data => {
-       resolve({ post: data });
-     }));
-     });			
+       resolve({ post: data.content });
+     }).catch(error => reject(new Error (error))) });
+    			
 	}
 
 	postsByTag(tag: string) : Promise<{posts: Post[]}> {		
-		// return new Promise((resolve, reject) => {
-		//   setTimeout(() => {
-		//   	if (!this.posts) {
-		//   		reject(new Error ('Error finding posts.' ));
-		//   	} else {
-		// 	  	resolve({ posts: this.posts.filter(post => post.tags.includes(tag)).sort((a,b) => b.createdAt.getTime() - a.createdAt.getTime()) });
-		//   	}
-		//   }, this.delay);
-    // });
+	
     return  new Promise((resolve, reject) => {		
-      this.httpClient.fetch(`posts/${tag}`)
-     .then(
-       response =>    
-         response.json()
+      this.httpClient.get(`tags/${tag}`)
+     
      .then(data => {
-       resolve({ posts: data });
-     }));
-     });			
+       resolve({ posts: data.content });
+     })});
+    
 	}
 
-	postsByArchive(archive) : Promise<{posts: Post[]}> {
-		let months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
-		return new Promise((resolve, reject) => {
-		  setTimeout(() => {
-		  	if (!this.posts) {
-		  		reject(new Error ('Error finding posts.' ));
-		  	} else {
-			  	resolve({ posts: this.posts.filter(post => {
-			  		return archive === `${months[post.createdAt.getMonth()]} ${post.createdAt.getFullYear()}`;
-			  	}).sort((a,b) => b.createdAt.getTime() - a.createdAt.getTime()) });
-		  	}
-		  }, this.delay);
-		});			
+	postsByArchive(archive:string) : Promise<{posts: Post[]}> {
+    var date = archive.split(" ")
+    
+    return  new Promise((resolve, reject) => {		
+      this.httpClient.get(`archives/${date[0]}/${date[1]}`)
+     
+     .then(data => {
+       resolve({ posts: data.content });
+     })});
 	}
 
 	slugify(text) {
