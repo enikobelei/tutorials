@@ -57,23 +57,19 @@ export class PostService {
 
 	create(post : Post) : Promise<{slug: string}>{
 		return new Promise((resolve, reject) => {
-		  setTimeout(() => {
+		 
 		  	let currentUser = this.authService.currentUser;
 		  	let slug = this.slugify(post.title);
 				if (currentUser) {
-					this.posts.push({
-						title: post.title,
-						body: post.body,
-						author: currentUser,
-						slug,
-						tags: post.tags,
-						createdAt: new Date()						
-					});
-					resolve({ slug });
+          var newpost = new Post(post.title, post.body, currentUser, slug,post.tags, new Date());
+          this.httpClient.post("posts", newpost).then(data=>
+					
+          resolve({ slug: data.content.slug }))
+          .catch(error => reject(new Error (error)))
 				} else {
 					reject(new Error ('You must be logged in to create a post.' ));
 				}
-		  }, this.delay);
+		  
 		});	
 	}
 
@@ -119,9 +115,15 @@ export class PostService {
     .replace(/-+$/, '');
 	}
 
-	update(post): Promise<{slug: string}> {
+	update(post: Post): Promise<{slug: string}> {
 		return new Promise((resolve, reject) => {
-		  setTimeout(() => {
+      let currentUser = this.authService.currentUser;
+
+      var newpost = new Post(post.title, post.body, post.author , post.slug ,post.tags,post.createdAt);
+      this.httpClient.post("posts", newpost).then(data=>
+      
+      resolve({ slug: data.content.slug }))
+      .catch(error => reject(new Error (error)))
 		  	// Get post based on slug and auther
 		  	let toUpdate = this.posts.find(x => {
 		  		return x.slug === post.slug && x.author === this.authService.currentUser;
@@ -132,7 +134,7 @@ export class PostService {
 		  		toUpdate = post;
 		  		resolve({ slug: toUpdate.slug });
 		  	}
-		  }, this.delay);
+		 
 		});			
 	}
 

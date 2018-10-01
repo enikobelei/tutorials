@@ -1,0 +1,15 @@
+# Please enter the commit message for your changes. Lines starting
+# with '#' will be ignored, and an empty message aborts the commit.
+#
+# On branch feature/aurelia
+# Your branch is up to date with 'origin/feature/aurelia'.
+#
+# Changes to be committed:
+#	modified:   aureliatutorial/src/common/services/auth-service.ts
+#	modified:   aureliatutorial/src/common/services/post-service.ts
+#arelia tutorial with .net backend
+
++aureliarelia tutorial with .net backend
+-- INSERT --
+
+
