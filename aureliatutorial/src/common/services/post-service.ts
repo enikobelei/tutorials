@@ -1,7 +1,7 @@
 import {inject, autoinject} from 'aurelia-framework';
 import {AuthService} from './auth-service';
 import {Post} from "./models";
-import {HttpClient} from 'aurelia-http-client';
+import {HttpClient} from 'aurelia-fetch-client';
 
 @autoinject
 export class PostService {
@@ -23,7 +23,7 @@ export class PostService {
             return request; // you can return a modified Request, or you can short-circuit the request by returning a Response
           },
           response(response) {
-            console.log(`Received ${response.content} `);
+            console.log(`Received ${response} `);
             return response; // you can return a modified Response
           }})
           
@@ -35,24 +35,24 @@ export class PostService {
 	allPostPreviews() : Promise<{posts: Post[]}>{
 	
     return new Promise((resolve, reject) => {		
-      this.httpClient.get("posts")
-        .then(data => resolve({ posts: data.content })
-    ).catch(error => reject(new Error (error)))});
+      this.httpClient.get("posts").then(response=>response.json()
+        .then(data => resolve({ posts: data })))
+    .catch(error => reject(new Error (error)))});
 
   }
 
 	allArchives() :Promise<{archives: string[]}> {
     return new Promise((resolve, reject) => {		
-      this.httpClient.get("archives")
-        .then(data => resolve({ archives: data.content })
-    ).catch(error => reject(new Error (error)))});
+      this.httpClient.get("archives").then(response=>response.json()
+        .then(data => resolve({ archives: data })))
+    .catch(error => reject(new Error (error)))});
 	}
 
 	allTags() : Promise<{tags: string[]}> {
     return new Promise((resolve, reject) => {		
-      this.httpClient.get("tags")
-        .then(data => resolve({ tags: data.content })
-    ).catch(error => reject(new Error (error)))});
+      this.httpClient.get("tags").then(response=>response.json()
+        .then(data => resolve({ tags: data })))
+    .catch(error => reject(new Error (error)))});
 	}
 
 	create(post : Post) : Promise<{slug: string}>{
@@ -62,9 +62,8 @@ export class PostService {
 		  	let slug = this.slugify(post.title);
 				if (currentUser) {
           var newpost = new Post(post.title, post.body, currentUser, slug,post.tags, new Date());
-          this.httpClient.post("posts", newpost).then(data=>
-					
-          resolve({ slug: data.content.slug }))
+          this.httpClient.post("posts", newpost).then(response=>response.json()
+          .then(data=> resolve({ slug: data.slug })))
           .catch(error => reject(new Error (error)))
 				} else {
 					reject(new Error ('You must be logged in to create a post.' ));
@@ -76,22 +75,20 @@ export class PostService {
 	find(slug: string) : Promise<{post: Post}> {
 		
     return  new Promise((resolve, reject) => {		
-      this.httpClient.get(`posts/${slug}`)
+      this.httpClient.get(`posts/${slug}`).then(response=>response.json()
     
-     .then(data => {
-       resolve({ post: data.content });
-     }).catch(error => reject(new Error (error))) });
+     .then(data => { resolve({ post: data }); })).catch(error => reject(new Error (error))) });
     			
 	}
 
 	postsByTag(tag: string) : Promise<{posts: Post[]}> {		
 	
     return  new Promise((resolve, reject) => {		
-      this.httpClient.get(`tags/${tag}`)
+      this.httpClient.get(`tags/${tag}`).then(response=>response.json()
      
      .then(data => {
        resolve({ posts: data.content });
-     })});
+     }))});
     
 	}
 
@@ -99,11 +96,11 @@ export class PostService {
     var date = archive.split(" ")
     
     return  new Promise((resolve, reject) => {		
-      this.httpClient.get(`archives/${date[0]}/${date[1]}`)
+      this.httpClient.get(`archives/${date[0]}/${date[1]}`).then(response=>response.json()
      
      .then(data => {
-       resolve({ posts: data.content });
-     })});
+       resolve({ posts: data });
+     }))});
 	}
 
 	slugify(text) {
@@ -120,20 +117,12 @@ export class PostService {
       let currentUser = this.authService.currentUser;
 
       var newpost = new Post(post.title, post.body, post.author , post.slug ,post.tags,post.createdAt);
-      this.httpClient.post("posts", newpost).then(data=>
+      this.httpClient.put(`posts/${post.slug}`, newpost).then(data=>
       
-      resolve({ slug: data.content.slug }))
+      resolve({ slug: post.slug }))
       .catch(error => reject(new Error (error)))
-		  	// Get post based on slug and auther
-		  	let toUpdate = this.posts.find(x => {
-		  		return x.slug === post.slug && x.author === this.authService.currentUser;
-		  	})
-		  	if (!toUpdate) {
-          reject(new Error ('There was an error updating the post.' ));	
-		  	} else {
-		  		toUpdate = post;
-		  		resolve({ slug: toUpdate.slug });
-		  	}
+		  
+		  
 		 
 		});			
 	}
